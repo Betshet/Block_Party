@@ -48,6 +48,9 @@ public class BlockSpawn : MonoBehaviour
 
     bool bStart = false;
 
+    [SerializeField]
+    GameManager gameManager;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -59,7 +62,12 @@ public class BlockSpawn : MonoBehaviour
         TableRadius = Mathf.Min(tb.extents.x, tb.extents.z);
 
         //Prefab select
-        iCurrentBlockPrefabIndex = Random.Range(0, BlockPrefabList.Count-1); 
+
+
+        /*iCurrentBlockPrefabIndex = Random.Range(0, BlockPrefabList.Count-1); 
+        BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;*/
+
+        GetRandomBlockToPlace();
         BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
     }
 
@@ -123,6 +131,7 @@ public class BlockSpawn : MonoBehaviour
         bDropping = true;
         BlockSpawner.SetActive(false);
         Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, Quaternion.identity);
+        gameManager.CurrentLevel[iCurrentBlockPrefabIndex]--;
         StartCoroutine(ResetAfterDrop());
     }
 
@@ -130,8 +139,51 @@ public class BlockSpawn : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         BlockSpawner.SetActive(true);
+        gameManager.iBlocksPlaced++;
         bDropping = false;
-        iCurrentBlockPrefabIndex = Random.Range(0, BlockPrefabList.Count);
+
+        GetRandomBlockToPlace();
         BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
+    }
+
+    void GetRandomBlockToPlace()
+    {
+        bool bFoundBlock = false;
+        List<int> currentLevel = gameManager.CurrentLevel;
+
+        int randomBlockInLevel;
+        int NumberOfBlocksToPlace;
+
+        bool bLevelFinished = true;
+        for (int i = 0; i < currentLevel.Count; i++)
+        {
+            if (currentLevel[i] > 0)
+            {
+                bLevelFinished = false;
+            }
+        }
+
+        if (bLevelFinished)
+        {
+            EndLevel();
+            return;
+        }
+
+
+        while (bFoundBlock == false)
+        {
+            randomBlockInLevel = Random.Range(0, currentLevel.Count);
+            NumberOfBlocksToPlace = currentLevel[randomBlockInLevel];
+            if (NumberOfBlocksToPlace > 0)
+            {
+                bFoundBlock = true;
+                iCurrentBlockPrefabIndex = randomBlockInLevel;
+            }
+        }
+    }
+
+    void EndLevel()
+    {
+        print("End Level");
     }
 }
