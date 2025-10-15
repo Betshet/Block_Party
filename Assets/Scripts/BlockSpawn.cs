@@ -51,6 +51,8 @@ public class BlockSpawn : MonoBehaviour
     [SerializeField]
     GameManager gameManager;
 
+    List<GameObject> BlocksSpawnedList;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -61,14 +63,13 @@ public class BlockSpawn : MonoBehaviour
         TableTop = tb.max.y;
         TableRadius = Mathf.Min(tb.extents.x, tb.extents.z);
 
+        BlocksSpawnedList = new List<GameObject>();
+
         //Prefab select
-
-
-        /*iCurrentBlockPrefabIndex = Random.Range(0, BlockPrefabList.Count-1); 
-        BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;*/
-
         GetRandomBlockToPlace();
         BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
+
+
     }
 
     // Update is called once per frame
@@ -130,7 +131,7 @@ public class BlockSpawn : MonoBehaviour
     {
         bDropping = true;
         BlockSpawner.SetActive(false);
-        Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, Quaternion.identity);
+        BlocksSpawnedList.Add(Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, Quaternion.identity));
         gameManager.CurrentLevel[iCurrentBlockPrefabIndex]--;
         StartCoroutine(ResetAfterDrop());
     }
@@ -166,6 +167,7 @@ public class BlockSpawn : MonoBehaviour
         if (bLevelFinished)
         {
             EndLevel();
+            //BlockSpawner.SetActive(false);
             return;
         }
 
@@ -184,6 +186,15 @@ public class BlockSpawn : MonoBehaviour
 
     void EndLevel()
     {
-        print("End Level");
+        foreach (GameObject block in BlocksSpawnedList)
+        {
+            print("End Level");
+            block.GetComponent<Rigidbody>().useGravity = false;
+            block.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+
+
+
+            gameManager.ChangeLevel(2);
+        }
     }
 }
