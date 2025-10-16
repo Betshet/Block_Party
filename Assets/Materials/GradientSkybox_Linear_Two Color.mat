@@ -27,8 +27,8 @@ Material:
     m_Floats:
     - _Exp: 1
     m_Colors:
-    - _BottomColor: {r: 0.29999998, g: 0.29999998, b: 1, a: 0}
-    - _TopColor: {r: 1, g: 0.29999998, b: 0.29999998, a: 0}
+    - _BottomColor: {r: 0.2980392, g: 0.95880085, b: 1, a: 0}
+    - _TopColor: {r: 1, g: 0.53810185, b: 0.2980392, a: 0}
     - _Up: {r: 0, g: 1, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
