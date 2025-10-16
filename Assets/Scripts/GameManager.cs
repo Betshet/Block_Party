@@ -37,11 +37,8 @@ public class GameManager : MonoBehaviour
     public List<int> CurrentLevel;
 
     public int iCurrentLevel = 1;
-    [HideInInspector]
     public bool bPauseGame = false;
-    [HideInInspector]
     public bool bGameOver = false;
-    [HideInInspector]
     public bool bNewDay = false;
 
     private void Awake()
