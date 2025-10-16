@@ -3,7 +3,12 @@ guid: 48876b51c55a08f47b508bb7644facf1
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Torus_mat
+    second: {fileID: 2100000, guid: 9ee47dafefe2e5743a7f00783b98a990, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

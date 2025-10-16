@@ -70,9 +70,15 @@ public class BlockSpawn : MonoBehaviour
 
         //Prefab select
         GetRandomBlockToPlace();
+        UpdateSpawnerAppearance();
+
+    }
+
+    void UpdateSpawnerAppearance()
+    {
         BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
-
-
+        BlockSpawner.GetComponent<Renderer>().material = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<Renderer>().sharedMaterial;
+        BlockSpawner.GetComponent<MeshRenderer>().materials = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshRenderer>().sharedMaterials;
     }
 
     // Update is called once per frame
@@ -90,7 +96,7 @@ public class BlockSpawn : MonoBehaviour
             BlockSpawner.SetActive(true);
             gameManager.bNewDay = false;
             GetRandomBlockToPlace();
-            BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
+            UpdateSpawnerAppearance();
         }
 
         Rect r = mainCamera.pixelRect;
@@ -142,7 +148,7 @@ public class BlockSpawn : MonoBehaviour
     {
         bDropping = true;
         BlockSpawner.SetActive(false);
-        BlocksSpawnedList.Add(Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, Quaternion.identity));
+        BlocksSpawnedList.Add(Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, BlockPrefabList[iCurrentBlockPrefabIndex].transform.rotation));
         gameManager.CurrentLevel[iCurrentBlockPrefabIndex]--;
         StartCoroutine(CheckObjectMovement());
     }
@@ -154,7 +160,7 @@ public class BlockSpawn : MonoBehaviour
         bDropping = false;
 
         GetRandomBlockToPlace();
-        BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
+        UpdateSpawnerAppearance();
     }
 
     IEnumerator CheckObjectMovement()
@@ -197,7 +203,6 @@ public class BlockSpawn : MonoBehaviour
                 bLevelFinished = false;
             }
         }
-
         if (bLevelFinished)
         {
             BlockSpawner.SetActive(false);
@@ -220,6 +225,7 @@ public class BlockSpawn : MonoBehaviour
 
     void EndLevel()
     {
+        print("end level");
         foreach (GameObject block in BlocksSpawnedList)
         {
             block.GetComponent<Rigidbody>().useGravity = false;
