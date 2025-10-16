@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class KillPlane : MonoBehaviour
 {
+    [SerializeField]
+    GameManager gameManager;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -18,6 +21,6 @@ public class KillPlane : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         Destroy(collision.gameObject);
-        print("HEY");
+        gameManager.GameOver();
     }
 }

@@ -1,120 +1,107 @@
-using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework;
+using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    InputAction MouseDelta;
-    Vector2 MouseScreenPosition;
+    [HideInInspector]
+    public int iBlocksPlaced = 0;
 
     [SerializeField]
-    public GameObject BlockToPlace;
+    public TextMeshProUGUI BlockCounterText;
 
     [SerializeField]
-    public Collider TableCollider;
+    public GameObject GameplayTexts;
 
     [SerializeField]
-    public Camera mainCamera;
+    TextMeshProUGUI GameOverText;
 
-    [Tooltip("Dégagement vertical entre le bas du bloc et le plateau pendant le placement.")]
-    public float hoverClearance = 2f;
+    [SerializeField]
+    List<TextMeshProUGUI> BlockToPlaceCounters;
 
-    Vector3 TableCenter;
-    float TableTop;
-    float TableRadius;
+    [HideInInspector]
+    public bool bGameStarted = false;
 
-    // Curseur virtuel (dans camera.pixelRect)
-    private Vector2 VirtualPosition;          // position écran "virtuelle"
-    private Vector2 VirtualVelocity;          // vitesse pour SmoothDamp
+    [SerializeField]
+    public List<int> BlocksToPlaceLevel1;
+    [SerializeField]
+    public List<int> BlocksToPlaceLevel2;
+    [SerializeField]
+    public List<int> BlocksToPlaceLevel3;
+    [SerializeField]
+    public List<int> BlocksToPlaceLevel4;
 
-    // Bloc
-    private float BlocHalfX, BlocHalfZ;            // demi-tailles X/Z (AABB du collider)
-    private float PlacementCenterY;
+    [HideInInspector]
+    public List<int> CurrentLevel;
 
-    [Tooltip("Lissage léger du curseur virtuel (secondes). 0 = aucun lissage.")]
-    [Range(0f, 0.2f)] public float screenSmoothing = 0.06f;
+    public int iCurrentLevel = 1;
+    public bool bPauseGame = false;
+    public bool bGameOver = false;
+    public bool bNewDay = false;
 
-    [Tooltip("Sensibilité de déplacement du curseur virtuel (px/frame). 1 = brut Input System.")]
-    [Range(0.1f, 3f)] public float cursorSensitivity = 1.0f;
-
-    bool bDropped = false;
-
-    public GameObject BlockPrefab;
-
+    private void Awake()
+    {
+        CurrentLevel = BlocksToPlaceLevel1;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //Table
-        Bounds tb = TableCollider.bounds;
-        TableCenter = tb.center;
-        TableTop = tb.max.y;
-        TableRadius = Mathf.Min(tb.extents.x, tb.extents.z);
+        GameOverText.enabled = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(bDropped)
-        {
-            return;
-        }
-        Rect r = mainCamera.pixelRect;
-        MouseScreenPosition = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
-
-        Vector2 target = new Vector2(
-            Mathf.Clamp(VirtualPosition.x + MouseScreenPosition.x, r.xMin, r.xMax),
-            Mathf.Clamp(VirtualPosition.y + MouseScreenPosition.y, r.yMin, r.yMax)
-        );
-
-
-        Vector2 _virtPos = target;
-
-        // 2) Mapping rect (viewport caméra) -> disque (table)
-        //    - centre écran -> centre de table
-        //    - bords écran -> bord de table
-        Vector2 centerPx = r.center;
-        float halfW = r.width * 0.5f;
-        float halfH = r.height * 0.5f;
-
-
-        // Coordonnées normalisées [-1..1] (x = écran horizontal -> axe X, y = écran vertical -> axe Z)
-        float nx = Mathf.Clamp((_virtPos.x - centerPx.x) / Mathf.Max(1e-5f, halfW), -1f, 1f);
-        float nz = Mathf.Clamp((_virtPos.y - centerPx.y) / Mathf.Max(1e-5f, halfH), -1f, 1f);
-
-        Vector2 s = new Vector2(nx, nz);       // vecteur carré normalisé
-        float len = s.magnitude;
-        Vector2 dir = (len > 1e-6f) ? (s / len) : Vector2.zero;  // direction radiale dans le disque
-        float rho = Mathf.Min(1f, len);                           // amplitude (<= 1)
-
-        // Rayon autorisé pour que TOUT le bloc reste sur la table dans CETTE direction
-        float support = Mathf.Sqrt((BlocHalfX * dir.x) * (BlocHalfX * dir.x) + (BlocHalfZ * dir.y) * (BlocHalfZ * dir.y));
-        float allowed = Mathf.Max(0f, TableRadius - support);
-
-        // Position finale (stick au bord si rho==1)
-        Vector2 xz = new Vector2(TableCenter.x, TableCenter.z) + dir * (rho * allowed);
-        Vector3 finalPos = new Vector3(xz.x, hoverClearance, xz.y);
-
-        
-        BlockToPlace.transform.position = finalPos;
-
         if (Input.GetMouseButtonDown(0))
         {
-            Drop();
+            if(bGameOver)
+            {
+                GameOverText.enabled = false;
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            }
+        }
+
+        if (!bGameStarted) return;
+
+        for (int i = 0; i < BlockToPlaceCounters.Count; i++)
+        {
+            BlockToPlaceCounters[i].text = CurrentLevel[i].ToString();
+        }
+
+        BlockCounterText.text = iBlocksPlaced.ToString();
+    }
+
+    public void ChangeLevel(int level)
+    {
+        iCurrentLevel = level;
+        print(iCurrentLevel);
+        switch (level)
+        {
+        case 1:
+            CurrentLevel = BlocksToPlaceLevel1;
+            break;
+        case 2:
+            CurrentLevel = BlocksToPlaceLevel2;
+            break;
+        case 3:
+            CurrentLevel = BlocksToPlaceLevel3;
+            break;
+        case 4:
+            CurrentLevel = BlocksToPlaceLevel4;
+            break;
+        default:
+            CurrentLevel = BlocksToPlaceLevel1;
+            break;
         }
     }
 
-    void Drop()
+    public void GameOver()
     {
-        BlockToPlace.SetActive(false);
-        Instantiate(BlockPrefab, BlockToPlace.transform.position, Quaternion.identity);
-        StartCoroutine(ResetAfterDrop());
-    }
-
-    IEnumerator ResetAfterDrop()
-    {
-        yield return new WaitForSeconds(1f);
-        BlockToPlace.SetActive(true);
+        GameOverText.enabled = true;
+        bPauseGame = true;
+        bGameOver = true;
     }
 }
