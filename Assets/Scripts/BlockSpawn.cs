@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -51,8 +52,10 @@ public class BlockSpawn : MonoBehaviour
     [SerializeField]
     GameManager gameManager;
 
-    List<GameObject> BlocksSpawnedList;
+    [SerializeField]
+    UIManager uiManager;
 
+    List<GameObject> BlocksSpawnedList;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -75,11 +78,20 @@ public class BlockSpawn : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !bStart)
-        {
-            bStart = true;
-        }
+        if (gameManager.bPauseGame) return;
+
+        if(!gameManager.bGameStarted) return;
+
         if (bDropping) return;
+
+        if(gameManager.bNewDay)
+        {
+            gameManager.ChangeLevel(gameManager.iCurrentLevel + 1);
+            BlockSpawner.SetActive(true);
+            gameManager.bNewDay = false;
+            GetRandomBlockToPlace();
+            BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
+        }
 
         Rect r = mainCamera.pixelRect;
         MouseScreenPosition = new Vector2 (Input.mousePosition.x, Input.mousePosition.y);
@@ -120,7 +132,6 @@ public class BlockSpawn : MonoBehaviour
         
         BlockSpawner.transform.position = finalPos;
 
-        if (!bStart) return;
         if (Input.GetMouseButtonDown(0))
         {
             Drop();
@@ -133,18 +144,41 @@ public class BlockSpawn : MonoBehaviour
         BlockSpawner.SetActive(false);
         BlocksSpawnedList.Add(Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, Quaternion.identity));
         gameManager.CurrentLevel[iCurrentBlockPrefabIndex]--;
-        StartCoroutine(ResetAfterDrop());
+        StartCoroutine(CheckObjectMovement());
     }
 
-    IEnumerator ResetAfterDrop()
+    void ResetAfterDrop()
     {
-        yield return new WaitForSeconds(1f);
         BlockSpawner.SetActive(true);
         gameManager.iBlocksPlaced++;
         bDropping = false;
 
         GetRandomBlockToPlace();
         BlockSpawner.GetComponent<MeshFilter>().mesh = BlockPrefabList[iCurrentBlockPrefabIndex].GetComponent<MeshFilter>().sharedMesh;
+    }
+
+    IEnumerator CheckObjectMovement()
+    {
+        bool bBlocksMoving = true;
+        while (bBlocksMoving)
+        {
+            yield return new WaitForSeconds(.5f);
+            int objectmove = 0;
+
+            foreach (GameObject block in BlocksSpawnedList)
+            {
+                bBlocksMoving = false;
+
+                Rigidbody rb = block.GetComponent<Rigidbody>();
+                if ((Mathf.Abs(rb.linearVelocity.sqrMagnitude) > 0.1f))
+                {
+                    objectmove++;
+                    bBlocksMoving = true;
+                }
+            }
+        }
+
+        ResetAfterDrop();
     }
 
     void GetRandomBlockToPlace()
@@ -166,8 +200,8 @@ public class BlockSpawn : MonoBehaviour
 
         if (bLevelFinished)
         {
+            BlockSpawner.SetActive(false);
             EndLevel();
-            //BlockSpawner.SetActive(false);
             return;
         }
 
@@ -188,13 +222,11 @@ public class BlockSpawn : MonoBehaviour
     {
         foreach (GameObject block in BlocksSpawnedList)
         {
-            print("End Level");
             block.GetComponent<Rigidbody>().useGravity = false;
             block.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-
-
-
-            gameManager.ChangeLevel(2);
         }
+
+        //swap to night
+        uiManager.StartNight();
     }
 }
