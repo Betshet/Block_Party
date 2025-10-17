@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static Unity.Collections.AllocatorManager;
 
 public class BlockSpawn : MonoBehaviour
 {
@@ -45,6 +46,15 @@ public class BlockSpawn : MonoBehaviour
 
     [SerializeField]
     public List<GameObject> BlockPrefabList;
+
+    [SerializeField]
+    List<Material> MaterialExhaustedList;
+
+    [SerializeField]
+    List<Material> MaterialEnergizedList;
+
+    [SerializeField]
+    List<Material> MaterialFallingList;
 
     int iCurrentBlockPrefabIndex = 0;
 
@@ -98,6 +108,9 @@ public class BlockSpawn : MonoBehaviour
             gameManager.bNewDay = false;
             GetRandomBlockToPlace();
             UpdateSpawnerAppearance();
+            ChangeBlocksMaterial(MaterialExhaustedList);
+            RenderSettings.skybox = uiManager.gradient_day;
+
         }
 
         Rect r = mainCamera.pixelRect;
@@ -227,13 +240,36 @@ public class BlockSpawn : MonoBehaviour
     void EndLevel()
     {
         print("end level");
+        ChangeBlocksMaterial(MaterialEnergizedList);
+
+        //swap to night
+        uiManager.StartNight();
+    }
+
+    void ChangeBlocksMaterial(List<Material> materialsToChangeTo)
+    {
         foreach (GameObject block in BlocksSpawnedList)
         {
             block.GetComponent<Rigidbody>().useGravity = false;
             block.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-        }
+            switch (block.GetComponent<Block>().blockType)
+            {
+                case Block.BlockType.Cube:
+                    block.GetComponent<Renderer>().material = materialsToChangeTo[0];
+                    break;
+                case Block.BlockType.Cone:
+                    block.GetComponent<Renderer>().material = materialsToChangeTo[1];
+                    break;
+                case Block.BlockType.Thorus:
+                    block.GetComponent<Renderer>().material = materialsToChangeTo[2];
+                    break;
+                case Block.BlockType.Sphere:
+                    block.GetComponent<Renderer>().material = materialsToChangeTo[3];
+                    break;
 
-        //swap to night
-        uiManager.StartNight();
+                case Block.BlockType.None:
+                    break;
+            }
+        }
     }
 }

@@ -78,6 +78,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2ac2837189c7a0e4c882eea6310aacb1, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 150860939210348137}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2ac2837189c7a0e4c882eea6310aacb1, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 5609366730900025249}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2ac2837189c7a0e4c882eea6310aacb1, type: 3}
       insertIndex: -1
@@ -88,6 +91,19 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2ac2837189c7a0e4c882eea6310aacb1, type: 3}
   m_PrefabInstance: {fileID: 21255770106816950}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &150860939210348137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903796166920623335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2544f08ee406314cbd5e3f3cef39adf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Block
+  blockType: 1
 --- !u!54 &5609366730900025249
 Rigidbody:
   m_ObjectHideFlags: 0
