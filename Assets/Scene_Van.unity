@@ -3153,8 +3153,8 @@ MonoBehaviour:
   BlockToPlaceCounters:
   - {fileID: 8596405454483783913}
   - {fileID: 7937337590266426994}
-  - {fileID: 2407640277548493146}
   - {fileID: 1799487972316871420}
+  - {fileID: 2407640277548493146}
   bGameStarted: 0
   BlocksToPlaceLevel1: 02000000020000000000000000000000
   BlocksToPlaceLevel2: 03000000020000000000000001000000
@@ -4755,6 +4755,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1180605043563315597, guid: 919df247aa2e8fb4797098faf3afe2cc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 156.3
+      objectReference: {fileID: 0}
     - target: {fileID: 1832197498769735222, guid: 919df247aa2e8fb4797098faf3afe2cc, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -4770,6 +4774,10 @@ PrefabInstance:
     - target: {fileID: 2458101313173541541, guid: 919df247aa2e8fb4797098faf3afe2cc, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2921814134264565252, guid: 919df247aa2e8fb4797098faf3afe2cc, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 216.5
       objectReference: {fileID: 0}
     - target: {fileID: 3199974780897472217, guid: 919df247aa2e8fb4797098faf3afe2cc, type: 3}
       propertyPath: m_IsActive
