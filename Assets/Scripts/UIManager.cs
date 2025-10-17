@@ -35,6 +35,12 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     public Material gradient_night;
 
+    [SerializeField]
+    GameObject sun;
+
+    [SerializeField]
+    GameObject moon;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -101,7 +107,15 @@ public class UIManager : MonoBehaviour
         gameManager.bPauseGame = true;
         NightScreen.SetActive(true);
         RenderSettings.skybox = gradient_night;
+        sun.SetActive(false);
+        moon.SetActive(true);
+    }
 
+    public void NewDay()
+    {
+        RenderSettings.skybox = gradient_day;
+        sun.SetActive(true);
+        moon.SetActive(false);
     }
 
     public void OnClick_NightButton()

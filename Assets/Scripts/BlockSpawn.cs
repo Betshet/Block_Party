@@ -54,7 +54,10 @@ public class BlockSpawn : MonoBehaviour
     List<Material> MaterialEnergizedList;
 
     [SerializeField]
-    List<Material> MaterialFallingList;
+    List<Material> MaterialFallingList;    
+    
+    [SerializeField]
+    List<Material> MaterialsNeutralList;
 
     int iCurrentBlockPrefabIndex = 0;
 
@@ -67,6 +70,8 @@ public class BlockSpawn : MonoBehaviour
     UIManager uiManager;
 
     List<GameObject> BlocksSpawnedList;
+
+    GameObject currentDroppingBlock;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -108,8 +113,11 @@ public class BlockSpawn : MonoBehaviour
             gameManager.bNewDay = false;
             GetRandomBlockToPlace();
             UpdateSpawnerAppearance();
-            ChangeBlocksMaterial(MaterialExhaustedList);
-            RenderSettings.skybox = uiManager.gradient_day;
+            foreach (GameObject block in BlocksSpawnedList)
+            {
+                ChangeBlocksMaterial(block, MaterialExhaustedList);
+            }
+            uiManager.NewDay();
 
         }
 
@@ -162,7 +170,10 @@ public class BlockSpawn : MonoBehaviour
     {
         bDropping = true;
         BlockSpawner.SetActive(false);
-        BlocksSpawnedList.Add(Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, BlockPrefabList[iCurrentBlockPrefabIndex].transform.rotation));
+        GameObject newBlock = Instantiate(BlockPrefabList[iCurrentBlockPrefabIndex], BlockSpawner.transform.position, BlockPrefabList[iCurrentBlockPrefabIndex].transform.rotation);
+        currentDroppingBlock = newBlock;
+        BlocksSpawnedList.Add(newBlock);
+        ChangeBlocksMaterial(newBlock,MaterialFallingList);
         gameManager.CurrentLevel[iCurrentBlockPrefabIndex]--;
         StartCoroutine(CheckObjectMovement());
     }
@@ -172,7 +183,7 @@ public class BlockSpawn : MonoBehaviour
         BlockSpawner.SetActive(true);
         gameManager.iBlocksPlaced++;
         bDropping = false;
-
+        ChangeBlocksMaterial(currentDroppingBlock, MaterialsNeutralList);
         GetRandomBlockToPlace();
         UpdateSpawnerAppearance();
     }
@@ -240,36 +251,37 @@ public class BlockSpawn : MonoBehaviour
     void EndLevel()
     {
         print("end level");
-        ChangeBlocksMaterial(MaterialEnergizedList);
+        foreach (GameObject block in BlocksSpawnedList)
+        {
+            block.GetComponent<Rigidbody>().useGravity = false;
+            block.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+            ChangeBlocksMaterial(block,MaterialEnergizedList);
+        }
 
         //swap to night
         uiManager.StartNight();
     }
 
-    void ChangeBlocksMaterial(List<Material> materialsToChangeTo)
+    void ChangeBlocksMaterial(GameObject blockToChange, List<Material> materialsToChangeTo)
     {
-        foreach (GameObject block in BlocksSpawnedList)
+        switch (blockToChange.GetComponent<Block>().blockType)
         {
-            block.GetComponent<Rigidbody>().useGravity = false;
-            block.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-            switch (block.GetComponent<Block>().blockType)
-            {
-                case Block.BlockType.Cube:
-                    block.GetComponent<Renderer>().material = materialsToChangeTo[0];
-                    break;
-                case Block.BlockType.Cone:
-                    block.GetComponent<Renderer>().material = materialsToChangeTo[1];
-                    break;
-                case Block.BlockType.Thorus:
-                    block.GetComponent<Renderer>().material = materialsToChangeTo[2];
-                    break;
-                case Block.BlockType.Sphere:
-                    block.GetComponent<Renderer>().material = materialsToChangeTo[3];
-                    break;
+            case Block.BlockType.Cube:
+            blockToChange.GetComponent<Renderer>().material = materialsToChangeTo[0];
+                break;
+            case Block.BlockType.Cone:
+            blockToChange.GetComponent<Renderer>().material = materialsToChangeTo[1];
+                break;
+            case Block.BlockType.Thorus:
+            blockToChange.GetComponent<Renderer>().material = materialsToChangeTo[2];
+                break;
+            case Block.BlockType.Sphere:
+            blockToChange.GetComponent<Renderer>().material = materialsToChangeTo[3];
+                break;
 
-                case Block.BlockType.None:
-                    break;
-            }
+            case Block.BlockType.None:
+                break;
         }
+        
     }
 }
