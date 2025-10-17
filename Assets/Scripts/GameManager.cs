@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     public List<int> BlocksToPlaceLevel3;
     [SerializeField]
     public List<int> BlocksToPlaceLevel4;
+    [SerializeField]
+    public List<int> BlocksToPlaceLevel5;
 
     [HideInInspector]
     public List<int> CurrentLevel;
@@ -94,6 +96,9 @@ public class GameManager : MonoBehaviour
             break;
         case 4:
             CurrentLevel = BlocksToPlaceLevel4;
+            break;
+        case 5:
+            CurrentLevel = BlocksToPlaceLevel5;
             break;
         default:
             CurrentLevel = BlocksToPlaceLevel1;
